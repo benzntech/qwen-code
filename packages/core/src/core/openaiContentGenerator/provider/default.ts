@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import type { Config } from '../../../config/config.js';
 import type { ContentGeneratorConfig } from '../../contentGenerator.js';
 import { DEFAULT_TIMEOUT, DEFAULT_MAX_RETRIES } from '../constants.js';
-import type { OpenAICompatibleProvider } from './types.js';
+import type { RequestMetadata, OpenAICompatibleProvider } from './types.js';
 
 /**
  * Default provider for standard OpenAI-compatible APIs
@@ -48,11 +48,40 @@ export class DefaultOpenAICompatibleProvider
 
   buildRequest(
     request: OpenAI.Chat.ChatCompletionCreateParams,
-    _userPromptId: string,
+    userPromptId: string,
   ): OpenAI.Chat.ChatCompletionCreateParams {
     // Default provider doesn't need special enhancements, just pass through all parameters
     return {
       ...request, // Preserve all original parameters including sampling params
+      ...(this.buildMetadata(userPromptId) || {}),
     };
+  }
+
+  buildMetadata(userPromptId: string): RequestMetadata | undefined {
+    if (!this.shouldIncludeMetadata()) {
+      return;
+    }
+
+    return {
+      metadata: {
+        sessionId: this.cliConfig.getSessionId?.(),
+        promptId: userPromptId,
+      },
+    };
+  }
+
+  /**
+   * Check if cache control should be disabled based on configuration.
+   *
+   * @returns true if cache control should be disabled, false otherwise
+   */
+  protected shouldDisableCacheControl(): boolean {
+    return (
+      this.cliConfig.getContentGeneratorConfig()?.disableCacheControl === true
+    );
+  }
+
+  protected shouldIncludeMetadata(): boolean {
+    return this.cliConfig.getContentGeneratorConfig()?.includeMetadata === true;
   }
 }

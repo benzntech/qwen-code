@@ -50,6 +50,9 @@ describe('DefaultOpenAICompatibleProvider', () => {
     // Mock Config
     mockCliConfig = {
       getCliVersion: vi.fn().mockReturnValue('1.0.0'),
+      getContentGeneratorConfig: vi.fn().mockReturnValue({
+        includeMetadata: false,
+      }),
     } as unknown as Config;
 
     provider = new DefaultOpenAICompatibleProvider(

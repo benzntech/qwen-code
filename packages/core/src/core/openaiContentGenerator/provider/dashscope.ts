@@ -10,24 +10,21 @@ import {
 import { tokenLimit } from '../../tokenLimits.js';
 import type {
   OpenAICompatibleProvider,
-  DashScopeRequestMetadata,
   ChatCompletionContentPartTextWithCache,
   ChatCompletionContentPartWithCache,
   ChatCompletionToolWithCache,
 } from './types.js';
+import { DefaultOpenAICompatibleProvider } from './default.js';
 
 export class DashScopeOpenAICompatibleProvider
+  extends DefaultOpenAICompatibleProvider
   implements OpenAICompatibleProvider
 {
-  private contentGeneratorConfig: ContentGeneratorConfig;
-  private cliConfig: Config;
-
   constructor(
     contentGeneratorConfig: ContentGeneratorConfig,
     cliConfig: Config,
   ) {
-    this.cliConfig = cliConfig;
-    this.contentGeneratorConfig = contentGeneratorConfig;
+    super(contentGeneratorConfig, cliConfig);
   }
 
   static isDashScopeProvider(
@@ -42,7 +39,7 @@ export class DashScopeOpenAICompatibleProvider
     );
   }
 
-  buildHeaders(): Record<string, string | undefined> {
+  override buildHeaders(): Record<string, string | undefined> {
     const version = this.cliConfig.getCliVersion() || 'unknown';
     const userAgent = `QwenCode/${version} (${process.platform}; ${process.arch})`;
     const { authType } = this.contentGeneratorConfig;
@@ -54,7 +51,7 @@ export class DashScopeOpenAICompatibleProvider
     };
   }
 
-  buildClient(): OpenAI {
+  override buildClient(): OpenAI {
     const {
       apiKey,
       baseUrl = DEFAULT_DASHSCOPE_BASE_URL,
@@ -85,7 +82,7 @@ export class DashScopeOpenAICompatibleProvider
    * @param userPromptId - Unique identifier for the user prompt for session tracking
    * @returns Configured request with DashScope-specific parameters applied
    */
-  buildRequest(
+  override buildRequest(
     request: OpenAI.Chat.ChatCompletionCreateParams,
     userPromptId: string,
   ): OpenAI.Chat.ChatCompletionCreateParams {
@@ -127,15 +124,6 @@ export class DashScopeOpenAICompatibleProvider
       ...(tools ? { tools } : {}),
       ...(this.buildMetadata(userPromptId) || {}),
     } as OpenAI.Chat.ChatCompletionCreateParams;
-  }
-
-  buildMetadata(userPromptId: string): DashScopeRequestMetadata {
-    return {
-      metadata: {
-        sessionId: this.cliConfig.getSessionId?.(),
-        promptId: userPromptId,
-      },
-    };
   }
 
   /**
@@ -328,14 +316,7 @@ export class DashScopeOpenAICompatibleProvider
     return request;
   }
 
-  /**
-   * Check if cache control should be disabled based on configuration.
-   *
-   * @returns true if cache control should be disabled, false otherwise
-   */
-  private shouldDisableCacheControl(): boolean {
-    return (
-      this.cliConfig.getContentGeneratorConfig()?.disableCacheControl === true
-    );
+  protected override shouldIncludeMetadata(): boolean {
+    return true;
   }
 }

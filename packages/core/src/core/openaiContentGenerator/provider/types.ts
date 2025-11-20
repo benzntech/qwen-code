@@ -24,7 +24,7 @@ export interface OpenAICompatibleProvider {
   ): OpenAI.Chat.ChatCompletionCreateParams;
 }
 
-export type DashScopeRequestMetadata = {
+export type RequestMetadata = {
   metadata: {
     sessionId?: string;
     promptId: string;

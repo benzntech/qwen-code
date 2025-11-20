@@ -65,6 +65,9 @@ export type ContentGeneratorConfig = {
   maxRetries?: number;
   // Disable cache control for DashScope providers
   disableCacheControl?: boolean;
+  // Include metadata in the request
+  includeMetadata?: boolean;
+  // Sampling parameters
   samplingParams?: {
     top_p?: number;
     top_k?: number;

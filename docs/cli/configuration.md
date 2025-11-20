@@ -164,7 +164,7 @@ Settings are organized into categories. All settings should be placed within the
   - **Default:** `0.7`
 
 - **`model.generationConfig`** (object):
-  - **Description:** Advanced overrides passed to the underlying content generator. Supports request controls such as `timeout`, `maxRetries`, and `disableCacheControl`, along with fine-tuning knobs under `samplingParams` (for example `temperature`, `top_p`, `max_tokens`). Leave unset to rely on provider defaults.
+  - **Description:** Advanced overrides passed to the underlying content generator. Supports request controls such as `timeout`, `maxRetries`, and `samplingParams`, along with fine-tuning knobs under `samplingParams` (for example `temperature`, `top_p`, `max_tokens`). Leave unset to rely on provider defaults.
   - **Default:** `undefined`
   - **Example:**
 
@@ -173,7 +173,6 @@ Settings are organized into categories. All settings should be placed within the
       "model": {
         "generationConfig": {
           "timeout": 60000,
-          "disableCacheControl": false,
           "samplingParams": {
             "temperature": 0.2,
             "top_p": 0.8,
