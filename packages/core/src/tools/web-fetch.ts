@@ -27,6 +27,8 @@ import { ToolNames, ToolDisplayNames } from './tool-names.js';
 
 const URL_FETCH_TIMEOUT_MS = 10000;
 const MAX_CONTENT_LENGTH = 100000;
+const USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 /**
  * Parameters for the WebFetch tool
@@ -71,7 +73,11 @@ class WebFetchToolInvocation extends BaseToolInvocation<
 
     try {
       console.debug(`[WebFetchTool] Fetching content from: ${url}`);
-      const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS);
+      const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS, {
+        headers: {
+          'User-Agent': USER_AGENT,
+        },
+      });
 
       if (!response.ok) {
         const errorMessage = `Request failed with status code ${response.status} ${response.statusText}`;

@@ -39,12 +39,19 @@ export function isPrivateIp(url: string): boolean {
 export async function fetchWithTimeout(
   url: string,
   timeout: number,
+  init?: RequestInit,
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    // Merge the signal from the AbortController with the provided init options
+    const options: RequestInit = {
+      ...init,
+      signal: controller.signal,
+    };
+
+    const response = await fetch(url, options);
     return response;
   } catch (error) {
     if (isNodeError(error) && error.code === 'ABORT_ERR') {
