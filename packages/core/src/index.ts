@@ -132,3 +132,6 @@ export { Storage } from './config/storage.js';
 
 // Export test utils
 export * from './test-utils/index.js';
+
+// Export routing module
+export * from './routing/index.js';

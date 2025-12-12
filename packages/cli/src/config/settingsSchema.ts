@@ -1177,6 +1177,42 @@ const SETTINGS_SCHEMA = {
     },
   },
 
+  routing: {
+    type: 'object',
+    label: 'Task Routing',
+    category: 'Advanced',
+    requiresRestart: false,
+    default: {} as {
+      enabled?: boolean;
+      preferences?: Array<{ taskType: string; model: string }>;
+    },
+    description:
+      'Settings for preference-aligned task-based routing. Enables automatic model selection based on task type classification.',
+    showInDialog: false,
+    properties: {
+      enabled: {
+        type: 'boolean',
+        label: 'Enable Task-Based Routing',
+        category: 'Advanced',
+        requiresRestart: false,
+        default: false,
+        description:
+          'Enable task-based routing to automatically select models based on the type of task being performed.',
+        showInDialog: false,
+      },
+      preferences: {
+        type: 'array',
+        label: 'Routing Preferences',
+        category: 'Advanced',
+        requiresRestart: false,
+        default: [] as Array<{ taskType: string; model: string }>,
+        description:
+          'Task type to model mappings for preference-aligned routing. Example: code_generation -> gpt-4o, code_understanding -> gpt-4o-mini',
+        showInDialog: false,
+      },
+    },
+  },
+
   extensions: {
     type: 'object',
     label: 'Extensions',

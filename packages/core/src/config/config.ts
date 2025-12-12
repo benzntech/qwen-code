@@ -772,6 +772,26 @@ export class Config {
     // This _metadata can be used for tracking model switches (reason, context)
   }
 
+  overrideModel(model: string): void {
+    this.setModel(model);
+  }
+
+  getRoutingConfig():
+    | {
+        enabled?: boolean;
+        preferences?: Array<{ taskType: string; model: string }>;
+      }
+    | undefined {
+    // Return routing config from loaded settings if available
+    // This will be set during Config initialization from cliConfig
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const settings = (this as any).settings;
+    if (settings && settings.routing) {
+      return settings.routing;
+    }
+    return undefined;
+  }
+
   isInFallbackMode(): boolean {
     return this.inFallbackMode;
   }

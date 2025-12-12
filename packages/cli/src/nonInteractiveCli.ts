@@ -41,6 +41,7 @@ import {
   createTaskToolProgressHandler,
   computeUsageFromMetrics,
 } from './utils/nonInteractiveHelpers.js';
+import { ModelRouter } from './services/ModelRouter.js';
 
 /**
  * Provides optional overrides for `runNonInteractive` execution.
@@ -158,6 +159,28 @@ export async function runNonInteractive(
 
       if (!initialPartList) {
         initialPartList = [{ text: input }];
+      }
+
+      // Apply task-based routing if enabled
+      const routingConfig = config.getRoutingConfig();
+      if (routingConfig && routingConfig.enabled) {
+        try {
+          const router = new ModelRouter(config);
+          const routing = await router.routeRequest(input);
+
+          if (routing.model) {
+            // Override the model based on routing decision
+            config.overrideModel(routing.model);
+            if (config.getDebugMode()) {
+              console.error(`[Task Routing] ${routing.reason}`);
+            }
+          }
+        } catch (err) {
+          // Log routing error but continue with default model
+          if (config.getDebugMode()) {
+            console.error('[Task Routing] Error during routing:', err);
+          }
+        }
       }
 
       const initialParts = normalizePartList(initialPartList);
