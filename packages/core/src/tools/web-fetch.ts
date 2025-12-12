@@ -9,6 +9,7 @@ import { ProxyAgent, setGlobalDispatcher } from 'undici';
 import type { Config } from '../config/config.js';
 import { ApprovalMode } from '../config/config.js';
 import { fetchWithTimeout, isPrivateIp } from '../utils/fetch.js';
+import { retryWithBackoff, type HttpError } from '../utils/retry.js';
 import { getResponseText } from '../utils/partUtils.js';
 import { ToolErrorType } from './tool-error.js';
 import type {
@@ -73,17 +74,22 @@ class WebFetchToolInvocation extends BaseToolInvocation<
 
     try {
       console.debug(`[WebFetchTool] Fetching content from: ${url}`);
-      const response = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS, {
-        headers: {
-          'User-Agent': USER_AGENT,
-        },
-      });
+      const response = await retryWithBackoff(async () => {
+        const res = await fetchWithTimeout(url, URL_FETCH_TIMEOUT_MS, {
+          headers: {
+            'User-Agent': USER_AGENT,
+          },
+        });
 
-      if (!response.ok) {
-        const errorMessage = `Request failed with status code ${response.status} ${response.statusText}`;
-        console.error(`[WebFetchTool] ${errorMessage}`);
-        throw new Error(errorMessage);
-      }
+        if (!res.ok) {
+          const errorMessage = `Request failed with status code ${res.status} ${res.statusText}`;
+          console.error(`[WebFetchTool] ${errorMessage}`);
+          const error = new Error(errorMessage);
+          (error as HttpError).status = res.status;
+          throw error;
+        }
+        return res;
+      });
 
       console.debug(`[WebFetchTool] Successfully fetched content from ${url}`);
       const html = await response.text();
